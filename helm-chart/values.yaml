@@ -1,0 +1,5 @@
+---
+ddagent:
+  url: 'otel-agent:55680'
+fqdn: 'sinatra-otel-demo.example.com'
+
