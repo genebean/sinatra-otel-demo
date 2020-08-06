@@ -1,6 +1,7 @@
 require 'sinatra/base'
 
 class HelloWorld < Sinatra::Base
+
   get '/*' do
     out = "<h1>Hello world!</h1>" + "\n"
 

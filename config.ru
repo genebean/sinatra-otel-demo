@@ -1,23 +1,23 @@
 require './hello_world'
 
-require 'opentracing'
-require 'ddtrace'
-require 'ddtrace/opentracer'
+require 'opentelemetry-api'
+require 'opentelemetry/exporters/jaeger'
+require 'opentelemetry-instrumentation-sinatra'
+require 'opentelemetry-sdk'
 
-# Activate the Datadog tracer for OpenTracing
-OpenTracing.global_tracer = Datadog::OpenTracer::Tracer.new
 
-Datadog.configure do |c|
-  c.use :sinatra
+jaeger_host = ENV['JAEGER_HOST'] || 'localhost'
 
-  c.distributed_tracing.propagation_inject_style = [Datadog::Ext::DistributedTracing::PROPAGATION_STYLE_B3]
-  c.distributed_tracing.propagation_extract_style = [Datadog::Ext::DistributedTracing::PROPAGATION_STYLE_B3]
+OpenTelemetry::SDK.configure do |c|
+  c.use 'OpenTelemetry::Instrumentation::Sinatra'
 
-  logger = Logger.new(STDOUT)
-  # c.logger.level = ::Logger::INFO
-  logger.formatter  = proc do |severity, datetime, progname, msg|
-    "[#{datetime}][#{progname}][#{severity}][#{Datadog.tracer.active_correlation}] #{msg}\n"
-  end
+  c.add_span_processor(
+    OpenTelemetry::SDK::Trace::Export::SimpleSpanProcessor.new(
+      OpenTelemetry::Exporters::Jaeger::Exporter.new(
+        service_name: 'sinatra-otel-demo', host: jaeger_host, port: 6831
+      )
+    )
+  )
 end
 
 run HelloWorld

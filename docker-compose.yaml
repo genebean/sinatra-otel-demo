@@ -1,0 +1,21 @@
+version: '3.0'
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.18
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
+    networks:
+      - traces
+  foo:
+    build: .
+    depends_on:
+      - jaeger
+    ports:
+      - "9292:9292"
+    networks:
+      - traces
+    environment:
+      - JAEGER_HOST=jaeger
+networks:
+  traces:
