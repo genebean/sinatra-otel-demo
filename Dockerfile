@@ -1,4 +1,4 @@
-FROM ruby:2.7
+FROM amd64/ruby:2.7
 
 ENV APP_ROOT /app
 
